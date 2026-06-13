@@ -1,0 +1,29 @@
+{
+  "raw_mae": 0.04367724858130168,
+  "variants": {
+    "full": {
+      "test_mae": 0.008105823394290591,
+      "improvement_pct": 81.44154300561709,
+      "mae_increase_vs_full_pct": 0.0,
+      "val_loss": 4.016672885752216e-05
+    },
+    "no_noise_features": {
+      "test_mae": 0.023605148747373926,
+      "improvement_pct": 45.95550426342712,
+      "mae_increase_vs_full_pct": 191.2122260645405,
+      "val_loss": 0.000315542403508776
+    },
+    "no_circuit_features": {
+      "test_mae": 0.00812896390144885,
+      "improvement_pct": 81.38856231679192,
+      "mae_increase_vs_full_pct": 0.2854800312397464,
+      "val_loss": 3.98989949254818e-05
+    },
+    "noisy_value_only": {
+      "test_mae": 0.02369926571760302,
+      "improvement_pct": 45.74002143589988,
+      "mae_increase_vs_full_pct": 192.37332920793472,
+      "val_loss": 0.00032127892648402067
+    }
+  }
+}

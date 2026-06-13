@@ -1,0 +1,93 @@
+# QAOA Error Mitigation Experiment Configuration
+
+experiment:
+  name: qaoa_maxcut_mitigation
+  description: Neural error mitigation for MaxCut QAOA
+
+# Quantum circuit parameters
+circuit:
+  type: qaoa
+  num_qubits: 6
+  num_layers: 3  # QAOA depth (p)
+  graph:
+    type: random  # random, regular, grid
+    edge_probability: 0.5  # For random graphs
+    degree: 3  # For regular graphs
+
+# Multiple graph sizes for scaling experiments
+scaling:
+  qubit_range:
+    - 4
+    - 6
+    - 8
+    - 10
+  samples_per_size: 500
+
+# Noise model parameters
+noise:
+  type: realistic
+  single_qubit_error: 0.001
+  two_qubit_error: 0.01
+  readout_error_0: 0.02
+  readout_error_1: 0.03
+  t1: 100.0
+  t2: 80.0
+  variable_noise: true
+  error_range:
+    - 0.001
+    - 0.05
+
+# Data generation
+data:
+  train_samples: 15000
+  val_samples: 3000
+  test_samples: 2000
+  shots: 8192
+  seed: 42
+
+# Neural network configuration
+model:
+  type: adaptive  # Adaptive model works well for QAOA
+  hidden_dims:
+    - 256
+    - 512
+    - 256
+  num_noise_levels: 5
+  dropout: 0.1
+
+# Training configuration
+training:
+  batch_size: 64
+  learning_rate: 0.001
+  weight_decay: 0.00001
+  num_epochs: 150
+  warmup_epochs: 10
+  gradient_clip: 1.0
+  scheduler: onecycle
+  loss_type: combined
+
+# Experiment tracking
+logging:
+  use_wandb: true
+  project_name: sqai2026-error-mitigation
+  run_name: qaoa_maxcut_experiment
+
+# Baselines
+baselines:
+  - none
+  - zne
+  - dd  # Dynamical Decoupling
+
+# Evaluation metrics
+evaluation:
+  metrics:
+    - approximation_ratio
+    - energy_error
+    - improvement_ratio
+  n_bootstrap: 1000
+
+# Output paths
+output:
+  checkpoint_dir: experiments/results/qaoa_maxcut/checkpoints
+  figures_dir: experiments/results/qaoa_maxcut/figures
+  data_dir: data/qaoa_maxcut

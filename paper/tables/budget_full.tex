@@ -1,0 +1,20 @@
+\begin{table*}[t]
+\caption{Equal-budget sweep at $n{=}8$ (100 instances): mean error reduction vs.\ unmitigated execution (\%) when every method spends the same total budget $B$ per evaluation point, split across its required executions.}
+\label{tab:budget_full}
+\centering\small
+\begin{tabular}{llcccc}
+\toprule
+Regime & Method & $B{=}2^{10}$ & $B{=}2^{12}$ & $B{=}2^{14}$ & $B{=}2^{16}$ \\
+\midrule
+Stochastic device & NEM (ours) & $+11$ & $+17$ & $+20$ & $+19$ \\
+ & ZNE-exponential & $-194$ & $-216$ & $-6$ & $+8$ \\
+ & ZNE-adaptive & $<-10^4$ & $<-10^4$ & $<-10^4$ & $+10$ \\
+ & CDR & $-132$ & $-54$ & $-9$ & $+47$ \\
+\midrule
+Coherent miscalibration & NEM (ours) & $+72$ & $+77$ & $+81$ & $+81$ \\
+ & ZNE-exponential & $-471$ & $-36$ & $-93$ & $-129$ \\
+ & ZNE-adaptive & $<-10^4$ & $-183$ & $+7$ & $-76$ \\
+ & CDR & $+23$ & $+42$ & $+68$ & $+84$ \\
+\bottomrule
+\end{tabular}
+\end{table*}

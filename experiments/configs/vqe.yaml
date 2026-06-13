@@ -1,0 +1,78 @@
+# VQE Error Mitigation Experiment Configuration
+
+experiment:
+  name: vqe_h2_mitigation
+  description: Neural error mitigation for H2 VQE ground state energy
+
+# Quantum circuit parameters
+circuit:
+  type: vqe
+  molecule: H2
+  num_qubits: 4
+  num_layers: 2
+  bond_distance: 0.735  # Angstroms
+  entanglement: linear
+  rotation_gates:
+    - ry
+    - rz
+
+# Noise model parameters
+noise:
+  type: realistic
+  single_qubit_error: 0.001
+  two_qubit_error: 0.01
+  readout_error_0: 0.02
+  readout_error_1: 0.03
+  t1: 100.0  # microseconds
+  t2: 80.0
+  variable_noise: true
+  error_range:
+    - 0.001
+    - 0.05
+
+# Data generation
+data:
+  train_samples: 10000
+  val_samples: 2000
+  test_samples: 1000
+  shots: 8192
+  seed: 42
+
+# Neural network configuration
+model:
+  type: standard  # standard, adaptive, hybrid, iterative
+  hidden_dims:
+    - 256
+    - 512
+    - 256
+  dropout: 0.1
+  use_attention: true
+
+# Training configuration
+training:
+  batch_size: 64
+  learning_rate: 0.001
+  weight_decay: 0.00001
+  num_epochs: 100
+  warmup_epochs: 5
+  gradient_clip: 1.0
+  scheduler: cosine
+  loss_type: huber  # mse, huber, combined
+
+# Experiment tracking
+logging:
+  use_wandb: true
+  project_name: sqai2026-error-mitigation
+  run_name: vqe_h2_experiment
+
+# Baselines for comparison
+baselines:
+  - none  # No mitigation
+  - zne   # Zero Noise Extrapolation
+  - pec   # Probabilistic Error Cancellation
+
+# Output paths
+output:
+  checkpoint_dir: experiments/results/vqe_h2/checkpoints
+  figures_dir: experiments/results/vqe_h2/figures
+  data_dir: data/vqe_h2

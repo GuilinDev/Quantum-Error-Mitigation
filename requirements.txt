@@ -1,0 +1,40 @@
+# Quantum Computing Frameworks
+qiskit>=1.0.0
+qiskit-aer>=0.14.0
+qiskit-ibm-runtime>=0.20.0
+pennylane>=0.35.0
+pennylane-qiskit>=0.35.0
+
+# Machine Learning
+torch>=2.2.0
+torchvision>=0.17.0
+numpy>=1.26.0
+scipy>=1.12.0
+scikit-learn>=1.4.0
+
+# Experiment Tracking
+wandb>=0.16.0
+
+# Chemistry for VQE
+pyscf>=2.5.0
+
+# Visualization
+matplotlib>=3.8.0
+seaborn>=0.13.0
+
+# Utilities
+pyyaml>=6.0.0
+tqdm>=4.66.0
+pandas>=2.2.0
+
+# Testing
+pytest>=8.0.0
+pytest-cov>=4.1.0
+
+# Development
+black>=24.0.0
+isort>=5.13.0
+mypy>=1.8.0
+
+# Error-mitigation baselines
+mitiq[qiskit]>=1.0.0

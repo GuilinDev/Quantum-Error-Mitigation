@@ -1,0 +1,37 @@
+{
+  "raw_mae": 0.04399,
+  "note": "reconstructed from model_size_ablation.log after output-dir race",
+  "configs": {
+    "tiny": {
+      "hidden_dims": [
+        32,
+        32
+      ],
+      "n_params": 88418,
+      "test_mae": 0.00817,
+      "improvement_pct": 81.4,
+      "val_loss": 4.8e-05
+    },
+    "small": {
+      "hidden_dims": [
+        64,
+        128
+      ],
+      "n_params": 110018,
+      "test_mae": 0.00804,
+      "improvement_pct": 81.7,
+      "val_loss": 4.7e-05
+    },
+    "standard": {
+      "hidden_dims": [
+        256,
+        512,
+        256
+      ],
+      "n_params": 428354,
+      "test_mae": 0.00805,
+      "improvement_pct": 81.7,
+      "val_loss": 4.6e-05
+    }
+  }
+}

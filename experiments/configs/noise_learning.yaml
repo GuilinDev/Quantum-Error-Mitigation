@@ -1,0 +1,86 @@
+# Noise Model Learning Experiment Configuration
+
+experiment:
+  name: noise_learning
+  description: Train neural network to learn quantum circuit noise characteristics
+
+# Circuit configurations for diverse training data
+circuits:
+  types:
+    - vqe
+    - qaoa
+  qubit_range:
+    - 2
+    - 8
+  layer_range:
+    - 1
+    - 4
+
+# Noise model parameters
+noise:
+  types:
+    - depolarizing
+    - thermal
+    - realistic
+  variable_noise: true
+  error_range:
+    - 0.0001
+    - 0.1
+
+# Data generation
+data:
+  train_samples: 50000
+  val_samples: 10000
+  test_samples: 5000
+  shots: 4096
+  seed: 42
+
+# Error predictor model
+model:
+  type: error_predictor
+  circuit_encoder:
+    hidden_dims:
+      - 128
+      - 256
+    latent_dim: 128
+  noise_encoder:
+    hidden_dim: 64
+    latent_dim: 64
+  fusion:
+    hidden_dims:
+      - 256
+      - 512
+      - 256
+  use_attention: true
+  dropout: 0.1
+
+# Training configuration
+training:
+  batch_size: 128
+  learning_rate: 0.0005
+  weight_decay: 0.0001
+  num_epochs: 200
+  warmup_epochs: 10
+  gradient_clip: 1.0
+  scheduler: cosine
+  loss_type: mse
+
+# Experiment tracking
+logging:
+  use_wandb: true
+  project_name: sqai2026-error-mitigation
+  run_name: noise_learning_experiment
+
+# Evaluation
+evaluation:
+  error_thresholds:
+    - 0.001
+    - 0.005
+    - 0.01
+    - 0.05
+
+# Output paths
+output:
+  checkpoint_dir: experiments/results/noise_learning/checkpoints
+  figures_dir: experiments/results/noise_learning/figures
+  data_dir: data/noise_learning

@@ -1,0 +1,31 @@
+\begin{table*}[t]
+\caption{Mean error reduction vs.\ unmitigated execution (\%) for every cell of the scaling study. 150 test instances per cell (100 at $n{=}20$); per-execution shots $S{=}8192$ ($n\le10$), $1024$ ($n{=}12,16$), $512$ ($n{=}20$). Asterisks mark cells where the NEM improvement is not significant at $p<0.05$ (paired $t$-test).}
+\label{tab:scaling_full}
+\centering\small
+\begin{tabular}{llccccccc}
+\toprule
+Regime & Method & $n{=}4$ & $n{=}6$ & $n{=}8$ & $n{=}10$ & $n{=}12$ & $n{=}16$ & $n{=}20$ \\
+\midrule
+Stochastic device & NEM (ours) & $+22$ & $+15$ & $+10$ & $+13$ & $+11$ & $+7$$^{*}$ & $+11$ \\
+ & Direct prediction & $-927$ & $-631$ & $-605$ & $-395$ & $-365$ & $-226$ & $-180$ \\
+ & ZNE-Richardson & $-32$ & $-34$ & $-46$ & $-29$ & $-160$ & $-102$ & $-144$ \\
+ & ZNE-exponential & $+21$ & $-87$ & $-35$ & $+7$ & $-894$ & $-206$ & $-1152$ \\
+ & ZNE-adaptive & $+20$ & $+21$ & $+15$ & $<-10^4$ & $-9970$ & $-6546$ & $<-10^4$ \\
+ & CDR & $+65$ & $+73$ & $+74$ & $+78$ & $+44$ & $+55$ & $+46$ \\
+\midrule
+Stochastic-correlated & NEM (ours) & $+68$ & $+66$ & $+66$ & $+67$ & $+64$ & $+62$ & $+61$ \\
+ & Direct prediction & $-302$ & $-186$ & $-156$ & $-120$ & $-74$ & $-57$ & $-7$ \\
+ & ZNE-Richardson & $-8$ & $-8$ & $+6$ & $-3$ & $-38$ & $-33$ & $-42$ \\
+ & ZNE-exponential & $-188$ & $+3$ & $-15$ & $-27$ & $-38$ & $-120$ & $-166$ \\
+ & ZNE-adaptive & $<-10^4$ & $+8$ & $-839$ & $-198$ & $<-10^4$ & $-2672$ & $-8$ \\
+ & CDR & $+90$ & $+90$ & $+93$ & $+88$ & $+78$ & $+81$ & $+69$ \\
+\midrule
+Coherent miscalibration & NEM (ours) & $+72$ & $+77$ & $+80$ & $+85$ & $+76$ & $+80$ & $+77$ \\
+ & Direct prediction & $-244$ & $-188$ & $-129$ & $-57$ & $-69$ & $-3$ & $-0$ \\
+ & ZNE-Richardson & $-29$ & $-11$ & $-10$ & $-12$ & $-17$ & $-6$ & $-29$ \\
+ & ZNE-exponential & $-104$ & $-24$ & $-70$ & $-281$ & $-87$ & $-464$ & $-32$ \\
+ & ZNE-adaptive & $+12$ & $<-10^4$ & $-6204$ & $-196$ & $-6250$ & $<-10^4$ & $-6604$ \\
+ & CDR & $+85$ & $+83$ & $+88$ & $+92$ & $+79$ & $+81$ & $+79$ \\
+\bottomrule
+\end{tabular}
+\end{table*}

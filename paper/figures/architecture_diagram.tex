@@ -1,0 +1,49 @@
+\documentclass[tikz,border=5pt]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,positioning,fit,backgrounds}
+
+\begin{document}
+\begin{tikzpicture}[
+    node distance=0.8cm,
+    box/.style={rectangle, draw, rounded corners, minimum height=0.8cm, minimum width=2cm, align=center, fill=blue!10},
+    encoder/.style={rectangle, draw, rounded corners, minimum height=1.2cm, minimum width=2.5cm, align=center, fill=green!15},
+    fusion/.style={rectangle, draw, rounded corners, minimum height=0.8cm, minimum width=3cm, align=center, fill=orange!20},
+    output/.style={rectangle, draw, rounded corners, minimum height=0.8cm, minimum width=2cm, align=center, fill=red!15},
+    arrow/.style={->, thick},
+]
+
+% Input features
+\node[box] (circuit_input) {Circuit Features\\$\mathbf{x}_c \in \mathbb{R}^{19}$};
+\node[box, right=2cm of circuit_input] (noise_input) {Noise Features\\$\mathbf{x}_n \in \mathbb{R}^{8}$};
+\node[box, right=2cm of noise_input] (noisy_value) {Noisy Value\\$\langle H \rangle_{\text{noisy}}$};
+
+% Encoders
+\node[encoder, below=1cm of circuit_input] (circuit_enc) {Circuit Encoder\\MLP [256, 512]};
+\node[encoder, below=1cm of noise_input] (noise_enc) {Noise Encoder\\MLP [128, 256]};
+
+% Embeddings
+\node[box, below=0.8cm of circuit_enc] (z_c) {$\mathbf{z}_c$};
+\node[box, below=0.8cm of noise_enc] (z_n) {$\mathbf{z}_n$};
+
+% Concatenation
+\node[fusion, below=1.5cm of z_n] (concat) {Concatenate\\$[\langle H \rangle_{\text{noisy}}; \mathbf{z}_c; \mathbf{z}_n]$};
+
+% Output network
+\node[fusion, below=0.8cm of concat] (output_mlp) {Output MLP\\[512, 256, 128]};
+
+% Final output
+\node[output, below=0.8cm of output_mlp] (pred) {Prediction\\$\langle H \rangle_{\text{pred}}$};
+
+% Arrows
+\draw[arrow] (circuit_input) -- (circuit_enc);
+\draw[arrow] (noise_input) -- (noise_enc);
+\draw[arrow] (circuit_enc) -- (z_c);
+\draw[arrow] (noise_enc) -- (z_n);
+\draw[arrow] (z_c) -- (concat);
+\draw[arrow] (z_n) -- (concat);
+\draw[arrow] (noisy_value) |- (concat);
+\draw[arrow] (concat) -- (output_mlp);
+\draw[arrow] (output_mlp) -- (pred);
+
+\end{tikzpicture}
+\end{document}
