@@ -112,11 +112,9 @@
 \node[bluebox, minimum width=2.7cm, minimum height=0.9cm] (pred) at (20.15, 2.3)
     {$\langle H \rangle_{\mathrm{pred}} \approx \langle H \rangle_{\mathrm{ideal}}$};
 
-% embeddings into the fusion block (orthogonal routing)
-\draw[arrow, rounded corners=6pt] (mlpc.east) -- ++(0.50, 0) |- ($(fusion.west)+(0, 0.35)$);
-\draw[arrow, rounded corners=6pt] (mlpn.east) -- ++(0.50, 0) |- ($(fusion.west)+(0,-0.35)$);
-\node[font=\sffamily\footnotesize] at (13.42, 3.38) {$\mathbf{z}_c$};
-\node[font=\sffamily\footnotesize] at (13.42, 1.22) {$\mathbf{z}_n$};
+% embeddings converge into the fusion block (straight arrows)
+\draw[arrow] (mlpc.east) -- ($(fusion.west)+(0, 0.42)$);
+\draw[arrow] (mlpn.east) -- ($(fusion.west)+(0,-0.42)$);
 
 % noisy value feeds the fusion directly (clear corridor between branches)
 \draw[arrow] (hnoisy.east) -- (fusion.west);
@@ -131,15 +129,18 @@
 % =====================================================================
 % (d) Complementarity strip
 % =====================================================================
-\node[font=\sffamily\footnotesize\bfseries, text=black!70] at (10.75, -0.18)
+\node[font=\sffamily\footnotesize\bfseries, text=black!70] at (10.75, 0.10)
     {Equal-budget comparison: every method spends the same total shots $B$ per evaluation};
 
-\node[greenbox, minimum width=10.4cm, minimum height=1.1cm] (regA) at (5.2, -1.10)
-    {\textbf{Quantum cost per evaluation} --- NEM: 1 execution (offline training amortized)\\
-     ZNE: 3--5 executions at $B/3$--$B/5$ shots each \quad CDR: 32 executions at $B/32$ shots each};
-\node[redbox, minimum width=10.4cm, minimum height=1.1cm] (regB) at (16.3, -1.10)
-    {\textbf{Result} --- at $B \le 2^{14}$, NEM is the only method beating unmitigated execution\\
-     (+72--81\% under miscalibration); CDR overtakes only at $B = 2^{16}$; ZNE unsafe under coherent noise};
+\node[greenbox, text width=9.7cm, minimum width=10.4cm, minimum height=1.1cm]
+     (regA) at (5.2, -1.25)
+    {\textbf{Quantum cost per evaluation} --- NEM: 1 execution (offline training amortized);
+     ZNE: 3--5 executions at $B/3$--$B/5$ shots each; CDR: 32 executions at $B/32$ shots each};
+\node[redbox, text width=9.7cm, minimum width=10.4cm, minimum height=1.1cm]
+     (regB) at (16.3, -1.25)
+    {\textbf{Result} --- at $B \le 2^{14}$, NEM is the only method beating unmitigated execution
+     (+72--81\% under miscalibration); CDR overtakes only at $B = 2^{16}$;
+     ZNE unsafe under coherent noise};
 
 \end{tikzpicture}
 \end{document}

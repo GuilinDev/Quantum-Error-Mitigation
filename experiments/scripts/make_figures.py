@@ -100,8 +100,12 @@ def fig_budget_pareto():
         ax.set_title(titles[regime])
         ax.grid(alpha=0.25, which="both", lw=0.4)
     axes[0].set_ylabel("Median $|$error$|$ (IQR shaded)")
-    axes[0].legend(loc="lower left", framealpha=0.9, handlelength=1.6)
+    handles, labels = axes[0].get_legend_handles_labels()
     fig.tight_layout()
+    fig.legend(handles, labels, loc="upper center", bbox_to_anchor=(0.5, 0.02),
+               ncol=5, frameon=True, framealpha=0.9, handlelength=1.6,
+               columnspacing=1.1)
+    fig.subplots_adjust(bottom=0.30)
     for ext in ("pdf", "png"):
         fig.savefig(FIGDIR / f"budget_pareto.{ext}")
     plt.close(fig)
@@ -113,7 +117,7 @@ def fig_phase_boundary():
     deltas = d["delta_points"]
     methods = ["raw", "neural", "zne_exponential", "zne_adaptive", "cdr"]
 
-    fig, ax = plt.subplots(figsize=(3.6, 2.7))
+    fig, ax = plt.subplots(figsize=(4.4, 2.7))
     for m in methods:
         med, lo, hi = [], [], []
         for delta in deltas:
@@ -128,8 +132,12 @@ def fig_phase_boundary():
     ax.set_xlabel(r"Coherent miscalibration bias $\delta$ (rad)")
     ax.set_ylabel("Median $|$error$|$ (IQR shaded)")
     ax.grid(alpha=0.25, which="both", lw=0.4)
-    ax.legend(loc="upper left", framealpha=0.9, handlelength=1.6)
+    handles, labels = ax.get_legend_handles_labels()
     fig.tight_layout()
+    fig.legend(handles, labels, loc="upper center", bbox_to_anchor=(0.5, 0.04),
+               ncol=3, frameon=True, framealpha=0.9, handlelength=1.6,
+               columnspacing=1.1)
+    fig.subplots_adjust(bottom=0.34)
     for ext in ("pdf", "png"):
         fig.savefig(FIGDIR / f"phase_boundary.{ext}")
     plt.close(fig)
@@ -174,8 +182,12 @@ def fig_scaling():
         ax.set_xticks(sizes)
         ax.grid(alpha=0.25, lw=0.4)
     axes[0].set_ylabel("Median error reduction (%)")
-    axes[0].legend(loc="lower left", framealpha=0.9, handlelength=1.6)
+    handles, labels = axes[0].get_legend_handles_labels()
     fig.tight_layout()
+    fig.legend(handles, labels, loc="upper center", bbox_to_anchor=(0.5, 0.04),
+               ncol=3, frameon=True, framealpha=0.9, handlelength=1.6,
+               columnspacing=1.1)
+    fig.subplots_adjust(bottom=0.28)
     for ext in ("pdf", "png"):
         fig.savefig(FIGDIR / f"scaling.{ext}")
     plt.close(fig)
