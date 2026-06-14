@@ -58,6 +58,7 @@ def scaling_table(cells):
         r"not significant at $p<0.05$ (paired $t$-test).}",
         r"\label{tab:scaling_full}",
         r"\centering\small",
+        r"\resizebox{\textwidth}{!}{%",
         r"\begin{tabular}{ll" + "c" * len(sizes) + "}",
         r"\toprule",
         "Regime & Method & " + " & ".join(f"$n{{=}}{n}$" for n in sizes) + r" \\",
@@ -77,7 +78,7 @@ def scaling_table(cells):
                 row.append(v)
             lines.append(" & ".join(row) + r" \\")
         lines.append(r"\midrule" if regime != "miscal" else r"\bottomrule")
-    lines += [r"\end{tabular}", r"\end{table*}"]
+    lines += [r"\end{tabular}", r"}", r"\end{table*}"]
     return "\n".join(lines)
 
 
@@ -116,6 +117,7 @@ def safety_table():
         r"unmitigated execution.}",
         r"\label{tab:safety_full}",
         r"\centering\small",
+        r"\resizebox{\textwidth}{!}{%",
         r"\begin{tabular}{llccc|ccc|ccc}",
         r"\toprule",
         r" & & \multicolumn{3}{c|}{NEM (ours)} & \multicolumn{3}{c|}{ZNE (best of three)} & \multicolumn{3}{c}{CDR} \\",
@@ -138,7 +140,7 @@ def safety_table():
             f"{name.replace('_', r'\_')} & {raw['mae']:.4f} & "
             f"{trio(nem)} & {trio(zne)} & {trio(cdr)} \\\\"
         )
-    lines += [r"\bottomrule", r"\end{tabular}", r"\end{table*}"]
+    lines += [r"\bottomrule", r"\end{tabular}", r"}", r"\end{table*}"]
     return "\n".join(lines)
 
 

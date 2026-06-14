@@ -2,6 +2,7 @@
 \caption{Mean error reduction vs.\ unmitigated execution (\%) for every cell of the scaling study. 150 test instances per cell (100 at $n{=}20$); per-execution shots $S{=}8192$ ($n\le10$), $1024$ ($n{=}12,16$), $512$ ($n{=}20$). Asterisks mark cells where the NEM improvement is not significant at $p<0.05$ (paired $t$-test).}
 \label{tab:scaling_full}
 \centering\small
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{llccccccc}
 \toprule
 Regime & Method & $n{=}4$ & $n{=}6$ & $n{=}8$ & $n{=}10$ & $n{=}12$ & $n{=}16$ & $n{=}20$ \\
@@ -28,4 +29,5 @@ Coherent miscalibration & NEM (ours) & $+72$ & $+77$ & $+80$ & $+85$ & $+76$ & $
  & CDR & $+85$ & $+83$ & $+88$ & $+92$ & $+79$ & $+81$ & $+79$ \\
 \bottomrule
 \end{tabular}
+}
 \end{table*}
