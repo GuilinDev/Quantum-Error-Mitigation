@@ -129,6 +129,51 @@ def run_estimation(
 _SAMPLED_DM_MAX_QUBITS = 10
 
 
+def _require_diagonal(observable: SparsePauliOp) -> None:
+    """Raise if the observable has any X or Y factor (non-diagonal).
+
+    Computational-basis shot sampling only resolves I/Z observables;
+    non-diagonal terms would need basis-rotated measurement.
+    """
+    labels = [str(p) for p in observable.paulis]
+    if any(ch in label for label in labels for ch in ("X", "Y")):
+        raise ValueError(
+            "shot-sampled estimation supports diagonal (I/Z) observables "
+            f"only; got {labels}"
+        )
+
+
+def _diagonal_expectation_from_counts(counts, observable: SparsePauliOp) -> float:
+    """Reduce computational-basis counts to a diagonal-observable expectation.
+
+    The Pauli label and the counts bitstring both list qubit (n-1) first,
+    so they zip aligned. Identity factors contribute +1; a Z on a qubit
+    measured as ``|1>`` flips the term's sign.
+
+    Args:
+        counts: Mapping bitstring -> count (Qiskit ``get_counts`` form).
+        observable: Diagonal observable.
+
+    Returns:
+        Shot estimate of the expectation value.
+    """
+    labels = [str(p) for p in observable.paulis]
+    coeffs = observable.coeffs.real
+    total = 0.0
+    n_shots = sum(counts.values())
+    for bitstring, count in counts.items():
+        bits = bitstring.replace(" ", "")
+        value = 0.0
+        for label, w in zip(labels, coeffs):
+            sign = 1.0
+            for pauli_ch, bit_ch in zip(label, bits):
+                if pauli_ch == "Z" and bit_ch == "1":
+                    sign = -sign
+            value += w * sign
+        total += value * count
+    return total / n_shots
+
+
 def run_estimation_sampled(
     circuit: QuantumCircuit,
     observable: SparsePauliOp,
@@ -163,12 +208,7 @@ def run_estimation_sampled(
     Raises:
         ValueError: If the observable contains X or Y factors.
     """
-    labels = [str(p) for p in observable.paulis]
-    if any(ch in label for label in labels for ch in ("X", "Y")):
-        raise ValueError(
-            "run_estimation_sampled supports diagonal (I/Z) observables "
-            f"only; got {labels}"
-        )
+    _require_diagonal(observable)
 
     if method == "auto":
         method = (
@@ -188,19 +228,53 @@ def run_estimation_sampled(
     if seed is not None:
         run_kwargs["seed_simulator"] = seed
     counts = simulator.run(measured, **run_kwargs).result().get_counts()
+    return _diagonal_expectation_from_counts(counts, observable)
 
-    coeffs = observable.coeffs.real
-    total = 0.0
-    n_shots = sum(counts.values())
-    for bitstring, count in counts.items():
-        # Both the Pauli label and the counts key list qubit (n-1) first.
-        bits = bitstring.replace(" ", "")
-        value = 0.0
-        for label, w in zip(labels, coeffs):
-            sign = 1.0
-            for pauli_ch, bit_ch in zip(label, bits):
-                if pauli_ch == "Z" and bit_ch == "1":
-                    sign = -sign
-            value += w * sign
-        total += value * count
-    return total / n_shots
+
+def run_estimation_hardware(
+    circuit: QuantumCircuit,
+    observable: SparsePauliOp,
+    shots: int,
+    backend,
+    optimization_level: int = 0,
+) -> float:
+    """Estimate a diagonal observable from ``shots`` on a runtime backend.
+
+    Mirrors :func:`run_estimation_sampled` but executes on a
+    qiskit-ibm-runtime ``BackendV2`` (a real QPU or a fake backend) via
+    ``SamplerV2``. The circuit is transpiled to the backend's ISA at the
+    given optimization level; level 0 is the default so that
+    mitiq-inserted gate folds (for ZNE) survive transpilation rather than
+    being optimized away. Counts are reduced to the diagonal-Z
+    expectation with the same convention as the simulation path, so a
+    mitiq executor can swap between the two transparently.
+
+    Args:
+        circuit: Bound quantum circuit (without measurements).
+        observable: Diagonal observable (I/Z factors only).
+        shots: Number of measurement shots.
+        backend: A qiskit-ibm-runtime ``BackendV2`` (real or fake).
+        optimization_level: Transpiler preset level; 0 preserves folds.
+
+    Returns:
+        Shot estimate of the expectation value.
+
+    Raises:
+        ValueError: If the observable contains X or Y factors.
+    """
+    from qiskit.transpiler import generate_preset_pass_manager
+    from qiskit_ibm_runtime import SamplerV2
+
+    _require_diagonal(observable)
+
+    measured = circuit.copy()
+    measured.measure_all()
+    pass_manager = generate_preset_pass_manager(
+        backend=backend, optimization_level=optimization_level
+    )
+    isa_circuit = pass_manager.run(measured)
+
+    sampler = SamplerV2(mode=backend)
+    result = sampler.run([isa_circuit], shots=shots).result()
+    counts = result[0].join_data().get_counts()
+    return _diagonal_expectation_from_counts(counts, observable)

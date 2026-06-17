@@ -41,7 +41,11 @@ from mitiq.zne.inference import AdaExpFactory, ExpFactory, RichardsonFactory
 from mitiq.zne.scaling import fold_gates_at_random, fold_global
 
 from .baselines import MitigationResult
-from ..utils.qiskit_compat import run_estimation, run_estimation_sampled
+from ..utils.qiskit_compat import (
+    run_estimation,
+    run_estimation_hardware,
+    run_estimation_sampled,
+)
 
 # Gate set required by mitiq CDR: all non-Clifford gates must be RZ
 # rotations (IBM native basis {Rz, sqrt(X), X, CNOT}).
@@ -68,6 +72,7 @@ class _CountingExecutor:
         shots: int,
         circuit_transform: Optional[Callable[[QuantumCircuit], QuantumCircuit]] = None,
         sampled: bool = False,
+        backend=None,
     ):
         """Initialize executor.
 
@@ -84,12 +89,20 @@ class _CountingExecutor:
                 measured shots (physically faithful, includes measurement
                 sampling noise) instead of the noiseless-readout
                 expectation value.
+            backend: A qiskit-ibm-runtime ``BackendV2`` (real QPU or fake
+                backend). When set, executions run on hardware via
+                :func:`run_estimation_hardware` and ``noise_model`` /
+                ``sampled`` are ignored (the device is the noise source).
+                No ``circuit_transform`` should be passed for hardware,
+                since the device's intrinsic miscalibration replaces the
+                injected one.
         """
         self.observable = observable
         self.noise_model = noise_model
         self.shots = shots
         self.circuit_transform = circuit_transform
         self.sampled = sampled
+        self.backend = backend
         self.n_executions = 0
 
     def __call__(self, circuit: QuantumCircuit) -> float:
@@ -97,6 +110,13 @@ class _CountingExecutor:
         self.n_executions += 1
         if self.circuit_transform is not None:
             circuit = self.circuit_transform(circuit)
+        if self.backend is not None:
+            return run_estimation_hardware(
+                circuit,
+                self.observable,
+                shots=self.shots,
+                backend=self.backend,
+            )
         if self.sampled:
             return run_estimation_sampled(
                 circuit,
@@ -164,6 +184,7 @@ def mitiq_zne(
     seed: Optional[int] = None,
     circuit_transform: Optional[Callable[[QuantumCircuit], QuantumCircuit]] = None,
     sampled: bool = False,
+    backend=None,
 ) -> MitigationResult:
     """Apply mitiq digital ZNE with gate folding to mitigate errors.
 
@@ -219,7 +240,7 @@ def mitiq_zne(
     )
     executor = _CountingExecutor(
         observable, aer_noise_model, shots,
-        circuit_transform=circuit_transform, sampled=sampled,
+        circuit_transform=circuit_transform, sampled=sampled, backend=backend,
     )
 
     mitigated = execute_with_zne(
@@ -302,6 +323,7 @@ def mitiq_cdr(
     circuit_transform: Optional[Callable[[QuantumCircuit], QuantumCircuit]] = None,
     sampled: bool = False,
     skip_transpile: bool = False,
+    backend=None,
 ) -> MitigationResult:
     """Apply mitiq Clifford Data Regression (CDR) to mitigate errors.
 
@@ -345,8 +367,10 @@ def mitiq_cdr(
 
     noisy_executor = _CountingExecutor(
         observable, aer_noise_model, shots,
-        circuit_transform=circuit_transform, sampled=sampled,
+        circuit_transform=circuit_transform, sampled=sampled, backend=backend,
     )
+    # The classical CDR training labels stay exact, noise-free, and
+    # in-simulation regardless of where the noisy executor runs.
     ideal_simulator = _CountingExecutor(observable, None, shots)
 
     # Raw noisy value of the (transpiled) target circuit, recorded for

@@ -1,0 +1,45 @@
+\documentclass[11pt]{letter}
+\usepackage[margin=0.9in]{geometry}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{parskip}
+
+% Tighten letter-class vertical spacing to fit one page.
+\setlength{\parskip}{4pt}
+\setlength{\longindentation}{0pt}
+
+\signature{Guilin Zhang, Kai Zhao, Xu Chu}
+\address{}
+\date{}
+
+\begin{document}
+
+\begin{letter}{The Editors-in-Chief\\ \textit{Quantum Machine Intelligence}\\ Springer Nature}
+
+\opening{Dear Editors,}
+
+We are pleased to submit our manuscript, ``Budget-Aware Neural Error Mitigation for Variational Quantum Algorithms,'' by Guilin Zhang, Kai Zhao, and Xu Chu, for consideration as a Research Article in \textit{Quantum Machine Intelligence}. The journal's Aims \& Scope explicitly lists ``AI for Quantum Error Correction and Mitigation'' as a topic of interest, and our work sits squarely within this remit: we use a learned neural model to mitigate noise in variational quantum algorithms (VQAs).
+
+The work introduces a budget-conditioned neural error mitigation (NEM) model that corrects a single shot-limited noisy VQA expectation value from one quantum circuit execution, conditioned on circuit features, device-characterization features, and the shot-noise scale $1/\sqrt{S}$, so that one network serves all shot budgets. Crucially, we evaluate it under an equal-budget protocol in which every method---NEM, zero-noise extrapolation (ZNE), and Clifford data regression (CDR)---spends the same total number of shots per evaluation point, split across the executions it requires (NEM~1, ZNE~3--5, CDR~32). This is the comparison that VQA optimization loops actually face, and it differs from prior neural-QEM work, which grants every method full per-execution shots.
+
+Our three contributions are:
+\begin{itemize}[leftmargin=*,topsep=2pt,itemsep=2pt]
+  \item \textbf{Budget-conditioned neural mitigation:} one network, one execution per evaluation, serving all shot budgets via $1/\sqrt{S}$ conditioning.
+  \item \textbf{An equal-budget evaluation protocol and Pareto analysis} that reflects real deployment cost---the methodological core of the paper.
+  \item \textbf{A characterization of when extrapolation-based ZNE catastrophically fails}---returning a worse answer than no mitigation on 38--65\% of miscalibration instances, with unbounded single-instance error---under physically motivated coherent miscalibration.
+\end{itemize}
+
+Under combined stochastic and coherent control-offset miscalibration noise, NEM is the only method that beats unmitigated execution at budgets up to $2^{14}$ shots ($+72$--$81\%$); CDR overtakes only at $2^{16}$ shots, at $32\times$ the per-evaluation quantum cost. These improvements hold from 4 to 20 qubits. We are deliberate about what we do not claim: CDR is more accurate wherever its $32\times$ per-evaluation cost is affordable, and our architecture is a plain residual MLP---the contribution is the protocol, the budget-conditioning, and the failure analysis, not a new network. We regard this candor as a feature of the work's scientific integrity.
+
+All simulation code and per-instance result data are public at \url{https://github.com/GuilinDev/Quantum-Error-Mitigation}, and the manuscript includes a complete Declarations section with an AI-use statement.
+
+% TODO: include once hardware run is done -- delete this entire block if hardware is not added.
+%To strengthen the empirical claims, we additionally include a small real-device validation on IBM quantum hardware that reproduces the central ordering---ZNE fails while NEM holds---under realistic coherent miscalibration, confirming that our simulation-based conclusions transfer to physical devices.
+
+We confirm that this manuscript is not under consideration elsewhere and that the authors have no competing interests to declare. We believe the work is a strong fit for the journal's scope and would be grateful for your consideration. Thank you for your time.
+
+\closing{Sincerely,}
+
+\end{letter}
+
+\end{document}

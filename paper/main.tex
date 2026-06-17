@@ -72,7 +72,7 @@ We are explicit about what NEM does not win: given $32\times$ the per-evaluation
 ZNE \citep{temme2017error,li2017efficient} assumes the bias varies smoothly with a controllable noise-scale factor; digital implementations amplify noise by unitary folding \citep{giurgicatiron2020digital}, and the technique has produced headline demonstrations on hardware at the 100-qubit scale \citep{kim2023evidence}. Its reliability, however, is contingent on the extrapolation ansatz matching the actual noise response, a sensitivity we quantify in Section~\ref{sec:failure}. Probabilistic error cancellation \citep{temme2017error,van2023probabilistic} yields unbiased estimates at exponential sampling cost; virtual distillation \citep{huggins2021virtual,koczor2021exponential} suppresses errors using multiple state copies at additional quantum cost. CDR \citep{czarnik2021error} fits a linear noisy-to-ideal regression on near-Clifford circuits executed on the device, paying tens of executions per target circuit but inheriting robustness to noise structure because it calibrates on the device as it actually is; \citet{strikis2021learning} extend the idea with learning-based protocols. \citet{bultrini2023unifying} benchmark these methods under a unified framework as a function of total shot budget and find that cheap methods win at small budgets while data-hungry methods win at large ones---the organizing observation our protocol builds on.
 
 \paragraph{Learned mitigation.}
-Neural networks have been used to reconstruct states and observables from noisy quantum data \citep{torlai2018neural} and to mitigate errors in quantum simulation \citep{bennewitz2022neural}. \citet{liao2023machine} benchmark random forests, multilayer perceptrons, and graph networks for expectation-value mitigation, including at the 100-qubit scale on hardware, and find learned models competitive with ZNE at lower quantum cost---an observation our protocol makes systematic. Closest to this work, \citet{cantori2024synergy} train convolutional networks to predict ideal expectation values of parameterized circuits from noisy values and circuit structure, including transfer to circuit sizes beyond the training set, and \citet{liao2025noiseagnostic} train noise-agnostic models with data-augmented training, outperforming ZNE and CDR on hardware at 4--6 qubits. Neither line of work controls for quantum cost: comparisons grant every method full per-execution shot counts, and the per-evaluation execution multiplicity is not part of the analysis. Our contribution is orthogonal and composable with theirs: an equal-budget protocol, budget conditioning of the model itself, and an explicit failure-mode analysis of the classical alternative.
+Neural networks have been used to reconstruct states and observables from noisy quantum data \citep{torlai2018neural} and to mitigate errors in quantum simulation \citep{bennewitz2022neural}. \citet{liao2023machine} benchmark random forests, multilayer perceptrons, and graph networks for expectation-value mitigation, including at the 100-qubit scale on hardware, and find learned models competitive with ZNE at lower quantum cost---an observation our protocol makes systematic. Closest to this work, \citet{cantori2024synergy} train convolutional networks to predict ideal expectation values of parameterized circuits from noisy values and circuit structure, including transfer to circuit sizes beyond the training set, and \citet{liao2025noiseagnostic} train noise-agnostic models with data-augmented training, outperforming ZNE and CDR on hardware at 4--6 qubits. In this journal, \citet{adeniyi2025adaptive} adapt a neural mitigator to per-circuit error characteristics and validate it on IBM hardware. Neither line of work controls for quantum cost: comparisons grant every method full per-execution shot counts, and the per-evaluation execution multiplicity is not part of the analysis. Our contribution is orthogonal and composable with theirs: an equal-budget protocol, budget conditioning of the model itself, and an explicit failure-mode analysis of the classical alternative.
 
 \section{Budget-conditioned neural mitigation}
 \label{sec:method}
@@ -121,6 +121,25 @@ NEM (ours) & 1 & $B$ & 4.4K executions $+$ 5 min training \\
 ZNE (exponential) & 3 & $B/3$ & --- \\
 ZNE (adaptive) & 4 & $B/4$ & --- \\
 CDR & 32 & $B/32$ & repeated per target circuit \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Break-even.}
+The offline cost is recovered after a modest number of evaluations. Let $M$ be the number of distinct evaluation points---parameter settings, or target circuits---that a deployed model serves before retraining. Counting every execution at equal per-execution shots, NEM's total quantum cost is $4400 + M$, against $kM$ for ZNE ($k=3$ or $4$) and $32M$ for CDR; the baselines carry no offline cost but pay their multiplicity at \emph{every} point, since CDR re-fits its near-Clifford regression for each target circuit. NEM is cheaper in total once $M$ exceeds $M^\star = \lceil 4400/(k-1) \rceil$: 142 points relative to CDR, 1{,}467 relative to adaptive ZNE, and 2{,}200 relative to exponential ZNE (Table~\ref{tab:breakeven}). A VQE optimization loop evaluates $10^3$--$10^4$ parameter settings, so it clears the CDR break-even by one to two orders of magnitude within a single run. The bound is conservative: training shots are drawn from $2^8$--$2^{16}$, so a deployment budget $B>2^8$ per execution amortizes the offline cost faster still.
+
+\begin{table}[t]
+\caption{Break-even: distinct evaluation points $M^\star$ beyond which NEM's total quantum cost (offline plus one execution per point) falls below the baseline's.}
+\label{tab:breakeven}
+\centering
+\small
+\begin{tabular}{lcc}
+\toprule
+NEM vs.\ & Per-eval.\ executions & Break-even $M^\star$ \\
+\midrule
+ZNE (exponential) & 3 & 2{,}200 \\
+ZNE (adaptive) & 4 & 1{,}467 \\
+CDR & 32 & 142 \\
 \bottomrule
 \end{tabular}
 \end{table}
