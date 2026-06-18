@@ -40,7 +40,7 @@
 \maketitle
 
 \begin{abstract}
-Quantum error mitigation methods differ not only in accuracy but in how many quantum circuit executions they consume per estimate: zero-noise extrapolation (ZNE) requires 3--5 executions, Clifford data regression (CDR) requires more than 30 per target circuit, while a trained neural mitigator needs exactly one. We argue that the practically relevant comparison is at \emph{equal total shot budget per evaluation point}, the regime faced by every variational quantum algorithm (VQA) whose optimization loop must evaluate thousands of parameter settings. We present a budget-conditioned neural error mitigation (NEM) model that predicts ideal expectation values from a single shot-limited measurement, circuit features, and device-characterization features, with the shot-noise scale supplied as an input so one network serves all budgets. Under an equal-budget protocol in which every method---including each ZNE fold point and each CDR training circuit---consumes measured shots under the same frozen noise realization, NEM is the only method that improves on unmitigated execution at budgets up to $2^{14}$ shots in both noise regimes studied, reducing error by 72--81\% under combined stochastic and coherent-miscalibration noise; CDR overtakes NEM only at $2^{16}$ shots per evaluation. We further characterize when extrapolation fails: under physically motivated control-offset miscalibration, folding-based ZNE returns a worse answer than no mitigation on roughly half of all instances, with unbounded single-instance errors, while NEM degrades gracefully and CDR remains accurate at $32\times$ the quantum cost. Under structured noise, improvements persist without degradation from 4 to 20 qubits. Budget-aware accounting, we argue, is the comparison that matters for deployment.
+Quantum error mitigation methods differ not only in accuracy but in how many quantum circuit executions they consume per estimate: zero-noise extrapolation (ZNE) requires 3--5 executions, Clifford data regression (CDR) requires more than 30 per target circuit, while a trained neural mitigator needs exactly one. We argue that the practically relevant comparison is at \emph{equal total shot budget per evaluation point}, the regime faced by every variational quantum algorithm (VQA) whose optimization loop must evaluate thousands of parameter settings. We present a budget-conditioned neural error mitigation (NEM) model that predicts ideal expectation values from a single shot-limited measurement, circuit features, and device-characterization features, with the shot-noise scale supplied as an input so one network serves all budgets. Under an equal-budget protocol in which every method---including each ZNE fold point and each CDR training circuit---consumes measured shots under the same frozen noise realization, NEM is the only method that improves on unmitigated execution at budgets up to $2^{14}$ shots in both noise regimes studied, reducing error by 72--81\% under combined stochastic and coherent-miscalibration noise; CDR overtakes NEM only at $2^{16}$ shots per evaluation. We further characterize when extrapolation fails: under physically motivated control-offset miscalibration, folding-based ZNE returns a worse answer than no mitigation on roughly half of all instances, with unbounded single-instance errors, while NEM degrades gracefully and CDR remains accurate at $32\times$ the quantum cost. We confirm this failure on a real IBM Heron processor, where folding ZNE returns a worse answer than no mitigation on up to 88\% of instances. Under structured noise, the neural improvements persist without degradation from 4 to 20 qubits. Budget-aware accounting, we argue, is the comparison that matters for deployment.
 
 \medskip
 \noindent\textbf{Keywords:} quantum error mitigation, variational quantum algorithms, neural networks, NISQ, zero-noise extrapolation, Clifford data regression
@@ -59,7 +59,7 @@ This paper makes four contributions.
 
 \emph{(ii) An equal-budget evaluation protocol and Pareto analysis.} Every method receives the same total shot budget $B$ per evaluation point, split across the executions it requires, with every execution---including each ZNE fold point and each CDR training circuit---drawn as measured shots under the same frozen noise realization (Section~\ref{sec:setup}). Under this protocol NEM is the only method that beats unmitigated execution at $B\le 2^{14}$ in both regimes studied, and CDR overtakes it only at $B=2^{16}$ (Section~\ref{sec:pareto}).
 
-\emph{(iii) A characterization of extrapolation failure.} Under physically motivated control-offset miscalibration \citep{krantz2019engineer}, unitary folding amplifies the coherent angle error linearly while the observable responds non-monotonically, so ZNE underperforms unmitigated execution on 38--65\% of instances with unbounded single-instance error; we map the failure boundary as a function of the miscalibration strength and quantify tail risk (Section~\ref{sec:failure}).
+\emph{(iii) A characterization of extrapolation failure.} Under physically motivated control-offset miscalibration \citep{krantz2019engineer}, unitary folding amplifies the coherent angle error linearly while the observable responds non-monotonically, so ZNE underperforms unmitigated execution on 38--65\% of instances with unbounded single-instance error; we map the failure boundary as a function of the miscalibration strength and quantify tail risk (Section~\ref{sec:failure}), and we confirm the failure on a real IBM Heron processor (Section~\ref{sec:hardware}).
 
 \emph{(iv) Scaling and controls.} Mean error reductions of 61--85\% under structured noise persist without degradation from 4 to 20 qubits, and a direct-prediction control---predicting $\Hideal$ from features alone, without the noisy measurement---fails catastrophically at every size, confirming that mitigation, not memorization, drives the result (Sections~\ref{sec:scaling} and~\ref{sec:ablations}).
 
@@ -217,6 +217,22 @@ CDR ($32\times$ cost) & .0035 & .0025 & .009 & 0.01 & 6\% \\
 
 The asymmetry in failure behavior matters as much as the averages. The neural model's output is a bounded residual correction: across all 2{,}000 structured-regime test instances (4--20 qubits) its worst-case error stays \emph{below} the worst unmitigated error, in every cell. A simple ensemble safeguard---train three seeds, fall back to the raw value when they disagree beyond a threshold calibrated on unlabeled data---further reduces the worse-than-raw rate from 7\% to 5\% at a cost of three points of mean improvement, and in the low-noise stochastic regime it pins the model's worst case exactly at the unmitigated level. We view the safeguard as cheap insurance rather than a core mechanism.
 
+\subsection{Real-hardware validation}
+\label{sec:hardware}
+
+The failure analysis above is the paper's most consequential claim, so we test it on a real device. We run the hardware-efficient VQE on \texttt{ibm\_marrakesh}, a 156-qubit Heron~r2 superconducting processor, on four qubits at two circuit depths (2 and 5 ansatz layers), comparing unmitigated execution against folding ZNE under the equal-budget protocol; ten and eight test instances respectively, 8{,}192 shots, all jobs grouped in a single batch. Real devices carry intrinsic control-offset miscalibration, so no noise is injected---the device \emph{is} the noise source.
+
+Figure~\ref{fig:hardware} shows the result: folding ZNE fails on real silicon exactly as predicted. Its mean error is $3.0\times$ the unmitigated error at two layers and $4.1\times$ at five layers, and it returns a worse answer than no mitigation on 80\% and 88\% of instances respectively. Unitary folding triples the circuit and amplifies the device's coherent and readout errors, which do not extrapolate to the zero-noise limit; the deeper circuit, with more gates to fold, fails harder. This is the same mechanism our simulations isolate (Section~\ref{sec:failure}), now confirmed on hardware without any modelling assumptions. The result establishes that the unsafe regime we characterize is not a simulation artefact but a property of real devices.
+
+We deliberately do not claim a hardware \emph{improvement} for the neural mitigator. On this device the four-qubit unmitigated error sits at the shot-noise floor (mean absolute error $0.013$ at $8{,}192$ shots), leaving little systematic bias to correct, and a model trained on an Aer digital twin of the device \emph{overcorrects} when deployed on the physical processor---a sim-to-real distribution shift, since the twin's depolarizing model overstates the device's actual bias. We report this honestly as a sim-to-real study in Appendix~\ref{app:hardware}; closing the gap requires on-device or data-augmented training~\citep{liao2025noiseagnostic,adeniyi2025adaptive}, which we leave to future work. The hardware contribution here is the device-level validation of the ZNE failure mode, the paper's central and most citable finding.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{figures/hardware_zne.pdf}
+\caption{Folding ZNE on real hardware (\texttt{ibm\_marrakesh}, 4 qubits). Per-instance absolute error of unmitigated execution (grey) versus ZNE-Richardson (orange); dashed lines are the means. ZNE's error exceeds the unmitigated error on 80\% (2 layers) and 88\% (5 layers) of instances, with mean error $3.0\times$ and $4.1\times$ the unmitigated level---the failure mode of Section~\ref{sec:failure}, confirmed on a physical device.}
+\label{fig:hardware}
+\end{figure}
+
 \subsection{Scaling}
 \label{sec:scaling}
 
@@ -271,7 +287,7 @@ At equal per-evaluation quantum budget, single-execution learned mitigation occu
 CDR is more accurate wherever its $32\times$ per-evaluation cost is affordable; our results quantify, not contest, that trade. Nor do we claim architectural novelty: the network is a plain residual MLP, and the contribution lies in the budget conditioning, the evaluation protocol, and the failure analysis.
 
 \paragraph{Limitations.}
-All experiments are simulations; the noise models, while physically motivated (calibration offsets, crosstalk, readout asymmetry), are not device-validated, and hardware evaluation is the necessary next step. Training labels require exact classical simulation, restricting training to classically simulable sizes; transfer from small training circuits to larger deployment circuits \citep{cantori2024synergy,strikis2021learning} and label-free data augmentation \citep{liao2025noiseagnostic} are the natural extensions, and both compose with our budget conditioning. Our observables are diagonal ($Z$-type); non-diagonal Hamiltonians require basis-rotated measurement and may change feature design. Each model is trained per device family and noise regime; drift beyond the characterized feature ranges requires retraining, though the success of shot-budget conditioning suggests broader conditioning is feasible. Finally, our ansatz family is fixed; generalization across circuit families is untested here and is where graph- or sequence-structured encoders would plausibly earn their complexity.
+Our evaluation is primarily in simulation; we validate the ZNE failure mode on real hardware (Section~\ref{sec:hardware}), but the neural mitigator's improvements are established in simulation, and a model trained on a digital twin does not transfer to the physical device without on-device training (Appendix~\ref{app:hardware}). The noise models, while physically motivated (calibration offsets, crosstalk, readout asymmetry), are otherwise not device-fitted. Training labels require exact classical simulation, restricting training to classically simulable sizes; transfer from small training circuits to larger deployment circuits \citep{cantori2024synergy,strikis2021learning} and label-free data augmentation \citep{liao2025noiseagnostic} are the natural extensions---and the route to closing the sim-to-real gap---and both compose with our budget conditioning. Our observables are diagonal ($Z$-type); non-diagonal Hamiltonians require basis-rotated measurement and may change feature design. Each model is trained per device family and noise regime; drift beyond the characterized feature ranges requires retraining, though the success of shot-budget conditioning suggests broader conditioning is feasible. Finally, our ansatz family is fixed; generalization across circuit families is untested here and is where graph- or sequence-structured encoders would plausibly earn their complexity.
 
 \section{Conclusion}
 \label{sec:conclusion}
@@ -301,6 +317,33 @@ Mitigation methods should be compared the way they are deployed: under a fixed q
 \input{tables/scaling_full}
 \input{tables/budget_full}
 \input{tables/safety_full}
+
+\section{Hardware sim-to-real study}
+\label{app:hardware}
+
+Section~\ref{sec:hardware} validates the ZNE failure mode on \texttt{ibm\_marrakesh} and notes, without elaboration, that a twin-trained neural mitigator does not transfer to the physical device. We give the full picture here, because the negative result is itself informative about when learned mitigation can and cannot be deployed.
+
+Our hardware protocol is sim-to-real by construction: we read the device calibration through the runtime \texttt{Target} (gate errors, $T_1/T_2$, readout), build an Aer noise model from it with \texttt{NoiseModel.from\_backend}, train the budget-conditioned model on that digital twin, and test on the physical processor. This is the hardest deployment setting---no device data enters training---and it exposes a clean distribution shift. Table~\ref{tab:hardware} reports the outcome. The twin's depolarizing channels overstate the device's true bias, so the model learns a correction that is too aggressive: on the near-shot-noise four-qubit circuits it overshoots the (already small) error, scoring $-3\%$ at two layers and $-94\%$ at five, where the deeper circuit's larger learned correction overshoots more.
+
+\begin{table}[t]
+\caption{Hardware results on \texttt{ibm\_marrakesh} (4 qubits, equal-budget, $8{,}192$ shots). Improvement is mean error reduction vs.\ unmitigated; ``worse'' is the fraction of instances exceeding the unmitigated error. ZNE's failure transfers to hardware; the twin-trained neural model's correction does not.}
+\label{tab:hardware}
+\centering
+\small
+\begin{tabular}{llccc}
+\toprule
+Depth & Method & Improvement & Worse & MAE \\
+\midrule
+\multirow{2}{*}{2 layers} & ZNE-Richardson & $-201\%$ & 80\% & .038 \\
+ & NEM (twin-trained) & $-3\%$ & 60\% & .013 \\
+\midrule
+\multirow{2}{*}{5 layers} & ZNE-Richardson & $-314\%$ & 88\% & .055 \\
+ & NEM (twin-trained) & $-94\%$ & 88\% & .026 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Two points qualify the negative result. First, the gap is a property of the \emph{twin}, not the method: in simulation, where training and test share the noise process (the deployment setting CDR and on-device methods also assume), the model is strongly positive (Sections~\ref{sec:pareto}--\ref{sec:scaling}). The hardware experiment swaps a matched noise model for a mismatched one, and the model degrades accordingly---the expected behaviour of a supervised corrector under covariate shift. Second, the failure is bounded in principle: the model emits a residual correction, and the ensemble safeguard of Section~\ref{sec:failure} gates large-disagreement corrections back to the raw value, so a safeguarded deployment would track the unmitigated baseline rather than ZNE's unbounded amplification. Closing the gap so the model actively helps on hardware requires training on device data---on-device label-free augmentation~\citep{liao2025noiseagnostic} or adaptive per-circuit conditioning~\citep{adeniyi2025adaptive}---which is the natural continuation of this work and the reason we frame the budget-conditioning result, not a hardware-accuracy claim, as the contribution.
 
 \section{Reproducibility details}
 \label{app:repro}

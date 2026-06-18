@@ -237,6 +237,7 @@ def run_estimation_hardware(
     shots: int,
     backend,
     optimization_level: int = 0,
+    mode=None,
 ) -> float:
     """Estimate a diagonal observable from ``shots`` on a runtime backend.
 
@@ -253,8 +254,12 @@ def run_estimation_hardware(
         circuit: Bound quantum circuit (without measurements).
         observable: Diagonal observable (I/Z factors only).
         shots: Number of measurement shots.
-        backend: A qiskit-ibm-runtime ``BackendV2`` (real or fake).
+        backend: A qiskit-ibm-runtime ``BackendV2`` (real or fake), used
+            for transpilation to the device ISA.
         optimization_level: Transpiler preset level; 0 preserves folds.
+        mode: Optional ``SamplerV2`` execution mode (e.g. an open
+            ``Batch``) so many executions share one queue reservation on
+            real hardware. Defaults to ``backend`` (one job per call).
 
     Returns:
         Shot estimate of the expectation value.
@@ -274,7 +279,7 @@ def run_estimation_hardware(
     )
     isa_circuit = pass_manager.run(measured)
 
-    sampler = SamplerV2(mode=backend)
+    sampler = SamplerV2(mode=mode if mode is not None else backend)
     result = sampler.run([isa_circuit], shots=shots).result()
     counts = result[0].join_data().get_counts()
     return _diagonal_expectation_from_counts(counts, observable)

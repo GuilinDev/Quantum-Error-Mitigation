@@ -142,6 +142,8 @@ def main():
     p.add_argument("--instances", type=int, default=15)
     p.add_argument("--shots", type=int, default=8192, help="Total budget B per evaluation")
     p.add_argument("--cdr-training-circuits", type=int, default=31)
+    p.add_argument("--skip-cdr", action="store_true",
+                   help="Omit CDR (its 32x executions dominate the hardware job count)")
     p.add_argument("--epochs", type=int, default=75)
     p.add_argument("--seed", type=int, default=42)
     p.add_argument("--smoke", action="store_true", help="Tiny run for plumbing checks")
@@ -179,38 +181,59 @@ def main():
 
         # Test on the actual backend under the equal-budget protocol.
         rng = np.random.default_rng(args.seed + 2)
-        rows = {"raw": [], "neural": [], "zne_richardson": [], "cdr": [], "ideal": []}
-        for i in range(args.instances):
-            params = rng.uniform(0, 2 * np.pi, vqe.num_parameters)
-            circuit = vqe.bind_parameters(params)
-            ideal = run_estimation(circuit, obs, noise_model=None, exact=True)
-            rows["ideal"].append(ideal)
-            # raw + NEM: 1 execution at full budget B
-            noisy = run_estimation_hardware(circuit, obs, shots=B, backend=backend)
-            rows["raw"].append(noisy)
-            nf = np.append(dev_feat, budget_feature(B)).astype(np.float32)
-            with torch.no_grad():
-                pred = float(model(
-                    torch.tensor([[noisy]], dtype=torch.float32),
-                    torch.tensor(vqe.to_feature_vector(params), dtype=torch.float32).unsqueeze(0),
-                    torch.tensor(nf, dtype=torch.float32).unsqueeze(0)).numpy()[0, 0])
-            rows["neural"].append(pred)
-            # ZNE Richardson: 3 executions at B/3
-            rows["zne_richardson"].append(mitiq_zne(
-                circuit, obs, None, extrapolation="richardson",
-                shots=max(B // 3, 1), backend=backend).mitigated_value)
-            # CDR: 32 executions at B/32 (noisy on hardware, labels classical-exact)
-            rows["cdr"].append(mitiq_cdr(
-                circuit, obs, None, num_training_circuits=args.cdr_training_circuits,
-                shots=max(B // (args.cdr_training_circuits + 1), 1),
-                backend=backend).mitigated_value)
-            print(f"  inst {i}: ideal={ideal:+.4f} raw={noisy:+.4f} "
-                  f"NEM={rows['neural'][-1]:+.4f} ZNE={rows['zne_richardson'][-1]:+.4f} "
-                  f"CDR={rows['cdr'][-1]:+.4f}")
+        rows = {"raw": [], "neural": [], "zne_richardson": [], "ideal": []}
+        if not args.skip_cdr:
+            rows["cdr"] = []
+
+        # On a real backend, group every execution into one Batch so the
+        # whole sweep shares a single queue reservation (Open plan allows
+        # Batch/job mode, not Session). Fake backends run locally with no
+        # batching (mode=None -> the backend itself).
+        use_batch = args.backend is not None
+        if use_batch:
+            from qiskit_ibm_runtime import Batch
+            batch_ctx = Batch(backend=backend)
+        else:
+            from contextlib import nullcontext
+            batch_ctx = nullcontext()
+
+        with batch_ctx as batch:
+            mode = batch if use_batch else None
+            for i in range(args.instances):
+                params = rng.uniform(0, 2 * np.pi, vqe.num_parameters)
+                circuit = vqe.bind_parameters(params)
+                ideal = run_estimation(circuit, obs, noise_model=None, exact=True)
+                rows["ideal"].append(ideal)
+                # raw + NEM: 1 execution at full budget B
+                noisy = run_estimation_hardware(circuit, obs, shots=B,
+                                                backend=backend, mode=mode)
+                rows["raw"].append(noisy)
+                nf = np.append(dev_feat, budget_feature(B)).astype(np.float32)
+                with torch.no_grad():
+                    pred = float(model(
+                        torch.tensor([[noisy]], dtype=torch.float32),
+                        torch.tensor(vqe.to_feature_vector(params), dtype=torch.float32).unsqueeze(0),
+                        torch.tensor(nf, dtype=torch.float32).unsqueeze(0)).numpy()[0, 0])
+                rows["neural"].append(pred)
+                # ZNE Richardson: 3 executions at B/3
+                rows["zne_richardson"].append(mitiq_zne(
+                    circuit, obs, None, extrapolation="richardson",
+                    shots=max(B // 3, 1), backend=backend, hw_mode=mode).mitigated_value)
+                line = (f"  inst {i}: ideal={ideal:+.4f} raw={noisy:+.4f} "
+                        f"NEM={rows['neural'][-1]:+.4f} ZNE={rows['zne_richardson'][-1]:+.4f}")
+                if not args.skip_cdr:
+                    # CDR: 32 executions at B/32 (noisy on hardware, labels classical-exact)
+                    rows["cdr"].append(mitiq_cdr(
+                        circuit, obs, None, num_training_circuits=args.cdr_training_circuits,
+                        shots=max(B // (args.cdr_training_circuits + 1), 1),
+                        backend=backend, hw_mode=mode).mitigated_value)
+                    line += f" CDR={rows['cdr'][-1]:+.4f}"
+                print(line, flush=True)
 
         ideal = np.array(rows["ideal"])
         cell = {"n": n, "raw_mae": float(np.mean(np.abs(np.array(rows["raw"]) - ideal)))}
-        for m in ("neural", "zne_richardson", "cdr"):
+        metric_methods = ["neural", "zne_richardson"] + ([] if args.skip_cdr else ["cdr"])
+        for m in metric_methods:
             err = np.abs(np.array(rows[m]) - ideal)
             raw_err = np.abs(np.array(rows["raw"]) - ideal)
             cell[m + "_mae"] = float(np.mean(err))
@@ -219,10 +242,12 @@ def main():
         cell["per_instance"] = {k: list(map(float, v)) for k, v in rows.items()}
         cell["seconds"] = time.time() - t0
         results["cells"][f"n{n}"] = cell
-        print(f"n={n} ORDERING: NEM {cell['neural_improvement_pct']:+.0f}% | "
-              f"ZNE {cell['zne_richardson_improvement_pct']:+.0f}% "
-              f"(worse-than-raw {cell['zne_richardson_worse_rate']*100:.0f}%) | "
-              f"CDR {cell['cdr_improvement_pct']:+.0f}%")
+        ordering = (f"n={n} ORDERING: NEM {cell['neural_improvement_pct']:+.0f}% | "
+                    f"ZNE {cell['zne_richardson_improvement_pct']:+.0f}% "
+                    f"(worse-than-raw {cell['zne_richardson_worse_rate']*100:.0f}%)")
+        if not args.skip_cdr:
+            ordering += f" | CDR {cell['cdr_improvement_pct']:+.0f}%"
+        print(ordering, flush=True)
 
     tag = "smoke" if args.smoke else "run"
     out_path = out_dir / f"hardware_{backend_name}_{tag}.json"

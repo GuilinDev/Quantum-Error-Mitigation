@@ -73,6 +73,7 @@ class _CountingExecutor:
         circuit_transform: Optional[Callable[[QuantumCircuit], QuantumCircuit]] = None,
         sampled: bool = False,
         backend=None,
+        hw_mode=None,
     ):
         """Initialize executor.
 
@@ -103,6 +104,7 @@ class _CountingExecutor:
         self.circuit_transform = circuit_transform
         self.sampled = sampled
         self.backend = backend
+        self.hw_mode = hw_mode
         self.n_executions = 0
 
     def __call__(self, circuit: QuantumCircuit) -> float:
@@ -116,6 +118,7 @@ class _CountingExecutor:
                 self.observable,
                 shots=self.shots,
                 backend=self.backend,
+                mode=self.hw_mode,
             )
         if self.sampled:
             return run_estimation_sampled(
@@ -185,6 +188,7 @@ def mitiq_zne(
     circuit_transform: Optional[Callable[[QuantumCircuit], QuantumCircuit]] = None,
     sampled: bool = False,
     backend=None,
+    hw_mode=None,
 ) -> MitigationResult:
     """Apply mitiq digital ZNE with gate folding to mitigate errors.
 
@@ -241,6 +245,7 @@ def mitiq_zne(
     executor = _CountingExecutor(
         observable, aer_noise_model, shots,
         circuit_transform=circuit_transform, sampled=sampled, backend=backend,
+        hw_mode=hw_mode,
     )
 
     mitigated = execute_with_zne(
@@ -324,6 +329,7 @@ def mitiq_cdr(
     sampled: bool = False,
     skip_transpile: bool = False,
     backend=None,
+    hw_mode=None,
 ) -> MitigationResult:
     """Apply mitiq Clifford Data Regression (CDR) to mitigate errors.
 
@@ -368,6 +374,7 @@ def mitiq_cdr(
     noisy_executor = _CountingExecutor(
         observable, aer_noise_model, shots,
         circuit_transform=circuit_transform, sampled=sampled, backend=backend,
+        hw_mode=hw_mode,
     )
     # The classical CDR training labels stay exact, noise-free, and
     # in-simulation regardless of where the noisy executor runs.

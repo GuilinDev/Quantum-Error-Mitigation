@@ -1,11 +1,11 @@
 \documentclass[11pt]{letter}
-\usepackage[margin=0.9in]{geometry}
+\usepackage[margin=0.82in]{geometry}
 \usepackage{hyperref}
 \usepackage{enumitem}
 \usepackage{parskip}
 
 % Tighten letter-class vertical spacing to fit one page.
-\setlength{\parskip}{4pt}
+\setlength{\parskip}{3pt}
 \setlength{\longindentation}{0pt}
 
 \signature{Guilin Zhang, Kai Zhao, Xu Chu}
@@ -33,8 +33,7 @@ Under combined stochastic and coherent control-offset miscalibration noise, NEM 
 
 All simulation code and per-instance result data are public at \url{https://github.com/GuilinDev/Quantum-Error-Mitigation}, and the manuscript includes a complete Declarations section with an AI-use statement.
 
-% TODO: include once hardware run is done -- delete this entire block if hardware is not added.
-%To strengthen the empirical claims, we additionally include a small real-device validation on IBM quantum hardware that reproduces the central ordering---ZNE fails while NEM holds---under realistic coherent miscalibration, confirming that our simulation-based conclusions transfer to physical devices.
+To ground the central claim, we include a real-device experiment on an IBM Heron processor confirming that folding ZNE returns a worse answer than no mitigation on up to 88\% of instances---the failure mode our analysis predicts, on physical hardware. We are candid that this validates the failure analysis rather than claiming hardware accuracy for our own method, whose twin-trained transfer to physical devices we report honestly as a sim-to-real limitation.
 
 We confirm that this manuscript is not under consideration elsewhere and that the authors have no competing interests to declare. We believe the work is a strong fit for the journal's scope and would be grateful for your consideration. Thank you for your time.
 
