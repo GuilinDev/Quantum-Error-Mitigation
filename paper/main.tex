@@ -14,6 +14,14 @@
 \usepackage{microtype}
 \usepackage{authblk}
 
+% Unnumbered footnote for the code/data link on page 1.
+\newcommand\blfootnote[1]{%
+  \begingroup
+  \renewcommand\thefootnote{}\footnote{#1}%
+  \addtocounter{footnote}{-1}%
+  \endgroup
+}
+
 \newcommand{\ket}[1]{\left|#1\right\rangle}
 \newcommand{\bra}[1]{\left\langle#1\right|}
 \newcommand{\expect}[1]{\langle#1\rangle}
@@ -38,6 +46,7 @@
 
 \begin{document}
 \maketitle
+\blfootnote{Code and data: \url{https://github.com/GuilinDev/Quantum-Error-Mitigation}}
 
 \begin{abstract}
 Variational quantum algorithms (VQAs) are limited by device noise, and error mitigation is the standard remedy on near-term hardware. Choosing a mitigation method for deployment requires comparing its true cost, yet the usual comparison hides it: it fixes the number of shots per circuit execution, while the methods differ sharply in how many executions they need per estimate. Zero-noise extrapolation (ZNE) needs three to five, Clifford data regression (CDR) more than thirty per target circuit, and a trained neural model exactly one; ZNE's accuracy further rests on a noise-scaling assumption that real devices violate. Inside a variational loop that evaluates thousands of parameter settings, it is this execution multiplicity, not the accuracy at unlimited shots, that decides which method is affordable. Our premise is that the comparison that matters is at \emph{equal total shot budget per evaluation point}. We present budget-conditioned neural error mitigation (NEM): one network corrects a single shot-limited measurement from circuit and device features, conditioned on the shot-noise scale so that one model serves every budget. We evaluate every method---including each ZNE fold point and each CDR training circuit---under a protocol that spends the same total shots per evaluation point. Under it, NEM is the only method that beats unmitigated execution at budgets up to $2^{14}$ shots, reducing error by 72--81\% under stochastic and coherent-miscalibration noise; CDR overtakes it only at $2^{16}$ shots, at $32\times$ the per-evaluation cost. We further characterize when extrapolation fails: under control-offset miscalibration, folding ZNE returns a worse answer than no mitigation on 38--65\% of instances in simulation, and on up to 88\% on a real IBM Heron processor. Improvements hold from 4 to 20 qubits. Budget-aware accounting, we argue, is the comparison that matters for deployment.
