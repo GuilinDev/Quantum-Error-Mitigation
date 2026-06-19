@@ -1,0 +1,187 @@
+{
+  "dataset": "experiments/results/hardware/finetune_dataset_ibm_marrakesh_n4L5.json",
+  "n": 4,
+  "layers": 5,
+  "shots": 8192,
+  "raw_mae": 0.017866882094642704,
+  "twin": {
+    "mae": 0.015021746735062708,
+    "improvement_pct": 15.924073067192268,
+    "worse_rate": 0.5
+  },
+  "affine": {
+    "mae": 0.009776090048900933,
+    "improvement_pct": 45.28373782780911,
+    "worse_rate": 0.1875,
+    "a": 0.7692877187808294,
+    "b": -0.00866116875343338
+  },
+  "grid": [
+    {
+      "lr": 0.0001,
+      "epochs": 40,
+      "freeze_encoders": false,
+      "impr_mean": 39.71175729827111,
+      "impr_std": 5.634912967226858,
+      "impr_min": 28.886105933962487,
+      "worse_mean": 0.275
+    },
+    {
+      "lr": 0.0001,
+      "epochs": 40,
+      "freeze_encoders": true,
+      "impr_mean": 39.983755670601106,
+      "impr_std": 4.338673020612272,
+      "impr_min": 31.76488649486092,
+      "worse_mean": 0.275
+    },
+    {
+      "lr": 0.0001,
+      "epochs": 60,
+      "freeze_encoders": false,
+      "impr_mean": 39.477881432617586,
+      "impr_std": 5.49913145319405,
+      "impr_min": 28.886105933962487,
+      "worse_mean": 0.275
+    },
+    {
+      "lr": 0.0001,
+      "epochs": 60,
+      "freeze_encoders": true,
+      "impr_mean": 39.696967594117595,
+      "impr_std": 4.297296394196976,
+      "impr_min": 31.76488649486092,
+      "worse_mean": 0.275
+    },
+    {
+      "lr": 0.0001,
+      "epochs": 100,
+      "freeze_encoders": false,
+      "impr_mean": 41.207287311133825,
+      "impr_std": 1.3279102291725564,
+      "impr_min": 39.50594104714952,
+      "worse_mean": 0.2625
+    },
+    {
+      "lr": 0.0001,
+      "epochs": 100,
+      "freeze_encoders": true,
+      "impr_mean": 39.724377696388615,
+      "impr_std": 4.275280009160449,
+      "impr_min": 31.76488649486092,
+      "worse_mean": 0.2875
+    },
+    {
+      "lr": 0.0002,
+      "epochs": 40,
+      "freeze_encoders": false,
+      "impr_mean": 39.499928416977006,
+      "impr_std": 6.42419484604234,
+      "impr_min": 28.402457252279017,
+      "worse_mean": 0.2625
+    },
+    {
+      "lr": 0.0002,
+      "epochs": 40,
+      "freeze_encoders": true,
+      "impr_mean": 39.240121294958115,
+      "impr_std": 4.797655105497355,
+      "impr_min": 30.4617290048678,
+      "worse_mean": 0.2125
+    },
+    {
+      "lr": 0.0002,
+      "epochs": 60,
+      "freeze_encoders": false,
+      "impr_mean": 38.9418661235477,
+      "impr_std": 5.926161602434425,
+      "impr_min": 28.402457252279017,
+      "worse_mean": 0.2625
+    },
+    {
+      "lr": 0.0002,
+      "epochs": 60,
+      "freeze_encoders": true,
+      "impr_mean": 39.76805168092795,
+      "impr_std": 4.836739590746834,
+      "impr_min": 30.4617290048678,
+      "worse_mean": 0.225
+    },
+    {
+      "lr": 0.0002,
+      "epochs": 100,
+      "freeze_encoders": false,
+      "impr_mean": 40.205488815967314,
+      "impr_std": 4.512504521383397,
+      "impr_min": 33.340435286736366,
+      "worse_mean": 0.2625
+    },
+    {
+      "lr": 0.0002,
+      "epochs": 100,
+      "freeze_encoders": true,
+      "impr_mean": 40.12312964955775,
+      "impr_std": 2.76846425196826,
+      "impr_min": 35.755086913117154,
+      "worse_mean": 0.2375
+    },
+    {
+      "lr": 0.0005,
+      "epochs": 40,
+      "freeze_encoders": false,
+      "impr_mean": 26.535440454006714,
+      "impr_std": 4.0658238004695955,
+      "impr_min": 19.906822470911738,
+      "worse_mean": 0.2375
+    },
+    {
+      "lr": 0.0005,
+      "epochs": 40,
+      "freeze_encoders": true,
+      "impr_mean": 39.357269791496094,
+      "impr_std": 2.501990641598203,
+      "impr_min": 34.983919064270864,
+      "worse_mean": 0.1875
+    },
+    {
+      "lr": 0.0005,
+      "epochs": 60,
+      "freeze_encoders": false,
+      "impr_mean": 33.96564885376587,
+      "impr_std": 4.513523354056166,
+      "impr_min": 25.610158270440913,
+      "worse_mean": 0.2375
+    },
+    {
+      "lr": 0.0005,
+      "epochs": 60,
+      "freeze_encoders": true,
+      "impr_mean": 40.26284519952429,
+      "impr_std": 3.093766090984047,
+      "impr_min": 34.983919064270864,
+      "worse_mean": 0.2
+    },
+    {
+      "lr": 0.0005,
+      "epochs": 100,
+      "freeze_encoders": false,
+      "impr_mean": 38.662409106349514,
+      "impr_std": 6.011241361099986,
+      "impr_min": 27.248955718216987,
+      "worse_mean": 0.25
+    },
+    {
+      "lr": 0.0005,
+      "epochs": 100,
+      "freeze_encoders": true,
+      "impr_mean": 40.99345851774466,
+      "impr_std": 3.079152705117373,
+      "impr_min": 37.25072254554779,
+      "worse_mean": 0.25
+    }
+  ],
+  "grid_impr_mean": 38.74209360599738,
+  "grid_impr_min": 19.906822470911738,
+  "n_configs_positive": 18,
+  "n_configs": 18
+}

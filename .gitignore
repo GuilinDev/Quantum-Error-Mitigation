@@ -137,3 +137,8 @@ paper/ieeeqai_version/
 paper/ieee_template/
 paper/qtml2026_abstract.md
 .claude/
+
+# build/export artifacts
+paper/overleaf/
+paper/overleaf_project.zip
+paper/arxiv_submission.tar.gz

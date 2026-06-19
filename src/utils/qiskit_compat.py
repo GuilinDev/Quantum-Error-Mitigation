@@ -283,3 +283,60 @@ def run_estimation_hardware(
     result = sampler.run([isa_circuit], shots=shots).result()
     counts = result[0].join_data().get_counts()
     return _diagonal_expectation_from_counts(counts, observable)
+
+
+def run_estimation_hardware_batch(
+    circuits: List[QuantumCircuit],
+    observable: SparsePauliOp,
+    shots: int,
+    backend,
+    optimization_level: int = 0,
+    mode=None,
+) -> List[float]:
+    """Estimate a diagonal observable for many circuits in ONE runtime job.
+
+    Mirrors :func:`run_estimation_hardware`, but transpiles a whole list of
+    circuits and submits them as a single ``SamplerV2`` PUB list, so the
+    entire batch shares one job's loading/reservation overhead. On the IBM
+    Open plan the billed quantum time is dominated by per-job overhead, so
+    collapsing N one-circuit jobs into one N-circuit job cuts QPU usage by
+    roughly N-fold. Use this for bulk data collection (e.g. an on-device
+    fine-tuning set); use the single-circuit variant when each execution
+    feeds a mitiq executor that must call back per circuit.
+
+    Args:
+        circuits: Bound circuits (without measurements).
+        observable: Diagonal observable (I/Z factors only).
+        shots: Measurement shots, applied to every circuit.
+        backend: A qiskit-ibm-runtime ``BackendV2`` (real or fake).
+        optimization_level: Transpiler preset level; 0 preserves structure.
+        mode: Optional ``SamplerV2`` execution mode (e.g. an open ``Batch``);
+            defaults to ``backend``.
+
+    Returns:
+        One expectation-value estimate per input circuit, in order.
+
+    Raises:
+        ValueError: If the observable contains X or Y factors.
+    """
+    from qiskit.transpiler import generate_preset_pass_manager
+    from qiskit_ibm_runtime import SamplerV2
+
+    _require_diagonal(observable)
+
+    pass_manager = generate_preset_pass_manager(
+        backend=backend, optimization_level=optimization_level
+    )
+    measured = []
+    for circuit in circuits:
+        m = circuit.copy()
+        m.measure_all()
+        measured.append(m)
+    isa_circuits = pass_manager.run(measured)
+
+    sampler = SamplerV2(mode=mode if mode is not None else backend)
+    result = sampler.run(isa_circuits, shots=shots).result()
+    return [
+        _diagonal_expectation_from_counts(result[i].join_data().get_counts(), observable)
+        for i in range(len(isa_circuits))
+    ]
