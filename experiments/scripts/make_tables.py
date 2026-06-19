@@ -128,6 +128,10 @@ def safety_table():
         name = cell["cell"]
         if not name.startswith(("miscal", "nonlinear")):
             continue
+        regime, n = name.rsplit("_n", 1)
+        regime_tex = {"miscal": "Coherent miscal.",
+                      "nonlinear": "Stochastic-corr."}[regime]
+        label = f"{regime_tex}, $n{{=}}{n}$"
         rows = {r["method"]: r for r in cell["rows"]}
         raw = rows["raw"]
         nem = rows["neural(best-seed)"]
@@ -137,7 +141,7 @@ def safety_table():
         def trio(r):
             return f"{r['median_ae']:.4f} & {r['max_ae']:.2f} & {r['worse_than_raw_rate']*100:.0f}\\%"
         lines.append(
-            f"{name.replace('_', r'\_')} & {raw['mae']:.4f} & "
+            f"{label} & {raw['mae']:.4f} & "
             f"{trio(nem)} & {trio(zne)} & {trio(cdr)} \\\\"
         )
     lines += [r"\bottomrule", r"\end{tabular}", r"}", r"\end{table*}"]

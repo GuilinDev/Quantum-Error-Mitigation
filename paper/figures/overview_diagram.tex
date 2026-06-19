@@ -93,9 +93,9 @@
     {Noise features $\mathbf{x}_n$\\ errors, readout, drift $\delta$, budget $1/\sqrt{S}$};
 
 \node[orangebox, minimum width=2.6cm, minimum height=1.05cm] (mlpc) at (11.45, 3.6)
-    {Circuit encoder\\ $\mathrm{MLP}_c$ $[256, 512]$};
+    {Circuit encoder\\ $\mathrm{MLP}_c$ $[128, 256]$};
 \node[orangebox, minimum width=2.6cm, minimum height=1.05cm] (mlpn) at (11.45, 1.0)
-    {Noise encoder\\ $\mathrm{MLP}_n$ $[128, 256]$};
+    {Noise encoder\\ $\mathrm{MLP}_n$ $[64]$};
 
 \draw[arrow] (vqa.east |- xc) -- (xc.west);
 \draw[arrow] (vqa.east |- xn) -- (xn.west);
@@ -108,7 +108,7 @@
 \node[orangebox, minimum width=2.6cm, minimum height=1.3cm] (fusion) at (14.55, 2.3)
     {Fusion\\ $[\langle H \rangle_{\mathrm{noisy}};\, \mathbf{z}_c;\, \mathbf{z}_n]$};
 \node[orangebox, minimum width=2.2cm, minimum height=1.05cm] (outmlp) at (17.3, 2.3)
-    {Output MLP\\ $[512, 256, 128]$};
+    {Output MLP\\ $[256, 512, 256]$};
 \node[bluebox, minimum width=2.7cm, minimum height=0.9cm] (pred) at (20.15, 2.3)
     {$\langle H \rangle_{\mathrm{pred}} \approx \langle H \rangle_{\mathrm{ideal}}$};
 
