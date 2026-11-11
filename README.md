@@ -1,7 +1,19 @@
 # Budget-Aware Neural Error Mitigation for Variational Quantum Algorithms
 
 Code and data for the paper "Budget-Aware Neural Error Mitigation for
-Variational Quantum Algorithms" (under review).
+Variational Quantum Algorithms".
+
+## Papers and code versions
+
+| Paper | Status | Code snapshot |
+|---|---|---|
+| When Error Mitigation Makes Things Worse: Budget-Aware Evaluation, Extrapolation Failure, and the Calibration Trust Boundary ([arXiv:2609.38713](https://arxiv.org/abs/2609.38713)) | NeurIPS 2026 SaTQuML workshop (oral, non-archival) | tag [`satquml-2026`](../../tree/satquml-2026) |
+| Budget-Aware Neural Error Mitigation for Variational Quantum Algorithms | Under review (journal) | tag [`qip-submission-2026-11`](../../tree/qip-submission-2026-11) |
+
+`main` contains the latest code. Check out a tag to get the exact code
+behind a given paper version. The journal version adds the physical-range
+projection analysis (`experiments/scripts/clip_analysis.py`); all earlier
+experiments are unchanged.
 
 We train a small neural network that corrects noisy VQA expectation values
 from a single shot-limited measurement. The model is conditioned on circuit
@@ -80,6 +92,16 @@ state as the raw measurement; virtual RZ gates are exempt.
 ## Citation
 
 ```bibtex
+@article{zhang2026worse,
+  title   = {When Error Mitigation Makes Things Worse: Budget-Aware Evaluation,
+             Extrapolation Failure, and the Calibration Trust Boundary},
+  author  = {Zhang, Guilin and Zhao, Kai and Cui, Xiquan and Heng, Henry and
+             Chu, Xu and Blanken, Aletta Johanna},
+  journal = {arXiv preprint arXiv:2609.38713},
+  note    = {NeurIPS 2026 Workshop on Secure and Trustworthy Quantum Machine Learning (SaTQuML)},
+  year    = {2026}
+}
+
 @article{zhang2026budget,
   title  = {Budget-Aware Neural Error Mitigation for Variational Quantum Algorithms},
   author = {Zhang, Guilin and Zhao, Kai and Chu, Xu},
