@@ -1,0 +1,27 @@
+\begin{table}[t]
+\caption{ZNE before and after projecting every estimate onto the physical range $[-1,1]$ (structured-regime scaling cells; instances and shot counts as in Table~\ref{tab:scaling_full}). Projection removes the divergent outliers (max error $\le 1.1$) but leaves the worse-than-unmitigated rate unchanged in every cell (all out-of-range estimates were worse than unmitigated before and after projection), and the mean improvement stays negative in most cells.}
+\label{tab:clip_full}
+\centering\small
+\begin{tabular}{l|ccc|ccc|c}
+\toprule
+ & \multicolumn{3}{c|}{ZNE-exponential} & \multicolumn{3}{c|}{ZNE-adaptive} & \\
+Cell & raw fit & clipped & max & raw fit & clipped & max & worse (exp/ada) \\
+\midrule
+Coherent miscal., $n{=}4$ & $-104\%$ & $-6\%$ & 0.94 & $+12\%$ & $+12\%$ & 0.16 & 43/38\% \\
+Coherent miscal., $n{=}6$ & $-24\%$ & $-24\%$ & 0.81 & $<\!-10^4\%$ & $-16\%$ & 0.92 & 60/50\% \\
+Coherent miscal., $n{=}8$ & $-70\%$ & $-45\%$ & 1.01 & $-6204\%$ & $-53\%$ & 1.03 & 50/47\% \\
+Coherent miscal., $n{=}10$ & $-281\%$ & $-22\%$ & 1.09 & $-196\%$ & $-14\%$ & 0.91 & 49/53\% \\
+Coherent miscal., $n{=}12$ & $-87\%$ & $-34\%$ & 1.05 & $-6250\%$ & $-22\%$ & 0.97 & 49/52\% \\
+Coherent miscal., $n{=}16$ & $-464\%$ & $-65\%$ & 1.00 & $<\!-10^4\%$ & $-33\%$ & 0.96 & 56/41\% \\
+Coherent miscal., $n{=}20$ & $-32\%$ & $-32\%$ & 0.44 & $-6604\%$ & $-94\%$ & 1.10 & 56/52\% \\
+\midrule
+Stochastic-corr., $n{=}4$ & $-188\%$ & $-55\%$ & 0.94 & $<\!-10^4\%$ & $-55\%$ & 1.07 & 45/47\% \\
+Stochastic-corr., $n{=}6$ & $+3\%$ & $+3\%$ & 0.08 & $+8\%$ & $+8\%$ & 0.08 & 49/44\% \\
+Stochastic-corr., $n{=}8$ & $-15\%$ & $-14\%$ & 0.90 & $-839\%$ & $-29\%$ & 1.04 & 51/49\% \\
+Stochastic-corr., $n{=}10$ & $-27\%$ & $-16\%$ & 0.96 & $-198\%$ & $-34\%$ & 0.97 & 49/53\% \\
+Stochastic-corr., $n{=}12$ & $-38\%$ & $-22\%$ & 0.96 & $<\!-10^4\%$ & $-91\%$ & 1.06 & 49/49\% \\
+Stochastic-corr., $n{=}16$ & $-120\%$ & $-47\%$ & 0.95 & $-2672\%$ & $-28\%$ & 1.06 & 53/55\% \\
+Stochastic-corr., $n{=}20$ & $-166\%$ & $-43\%$ & 0.92 & $-8\%$ & $-8\%$ & 0.10 & 59/52\% \\
+\bottomrule
+\end{tabular}
+\end{table}
